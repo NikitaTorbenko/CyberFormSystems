@@ -1,14 +1,22 @@
-import ky from "ky";
+import axios from "axios";
 import { BASE_URL, REQUEST_TIMEOUT } from "../consts";
 
-export const BASE_API = ky.create({
-  prefixUrl: BASE_URL,
+export const BASE_API = axios.create({
+  baseURL: BASE_URL,
   timeout: REQUEST_TIMEOUT,
-  hooks: {
-    beforeRequest: [
-      (request) => {
-        console.log(`Request: ${request.url}`);
-      },
-    ],
+  headers: {
+    Accept: "application/json",
+    "Content-Type": "application/json",
+    "ngrok-skip-browser-warning": false,
   },
 });
+
+// export const FILE_API = axios.create({
+//   baseURL: FILE_SERVER_URL,
+//   timeout: REQUEST_TIMEOUT,
+//   headers: {
+//     Accept: "application/json",
+//     "Content-Type": "application/json",
+//     "ngrok-skip-browser-warning": false,
+//   },
+// });

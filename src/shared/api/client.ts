@@ -1,28 +1,33 @@
-import { BASE_API, type IClient } from "./model";
+import { type AxiosInstance, type AxiosRequestConfig } from "axios";
+import { type IClient } from "./model/types";
+import { BASE_API } from "./model";
 
-export const ApiClient = async <R, B = unknown>({
-  url,
-  method = "GET",
-  params,
-  json,
-  headers,
-}: IClient<B>): Promise<{ data: R; status: number; total?: string }> => {
-  try {
-    const response = await BASE_API(url, {
-      method,
-      json,
-      searchParams: params,
-      headers,
+export const ApiClient = async (
+  { url, method = "GET", data, params, headers }: IClient,
+  scheme: AxiosInstance = BASE_API
+) => {
+  const requestParams: AxiosRequestConfig = {
+    method,
+    url,
+    params,
+    data,
+  };
+
+  scheme.defaults.headers = { ...scheme.defaults.headers, ...headers };
+
+  return scheme(requestParams)
+    .then((res) => ({
+      data: res.data,
+      status: res.status,
+      total: res.headers["x-total-count"],
+    }))
+    .catch((err) => {
+      console.error(
+        "\nERROR MESSAGE:",
+        err.response?.data.message,
+        `\nSTATUS: ${err.response?.data.status}`
+      );
+
+      return { data: "isError", status: err.response?.status, total: "0" };
     });
-
-    const result: R = await response.json();
-    return {
-      data: result,
-      status: response.status,
-      total: response.headers.get("x-total-count") || "0",
-    };
-  } catch (error) {
-    console.error("❌ Ошибка API:", error);
-    return { data: "isError" as unknown as R, status: 500, total: "0" };
-  }
 };
